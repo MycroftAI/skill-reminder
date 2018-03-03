@@ -24,6 +24,7 @@ import re
 import yaml
 from adapt.intent import IntentBuilder
 from os.path import dirname
+from future.utils import iteritems
 
 from mycroft.skills.scheduled_skills import ScheduledCRUDSkill
 
@@ -110,7 +111,7 @@ class ReminderSkill(ScheduledCRUDSkill):
 
     def __fix_pronouns(self, utterance):
         msg = utterance.strip()
-        for key, val in self.PRONOUNS.iteritems():
+        for key, val in iteritems(self.PRONOUNS):
             k = key.lower()
             v = val.lower()
             msg = msg.replace(' ' + k + ' ', ' ' + v + ' ')
