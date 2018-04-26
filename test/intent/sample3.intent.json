@@ -3,5 +3,6 @@
   "intent_type": "ReminderSkillCreateIntent",
   "intent": {
     "ReminderSkillCreateVerb": "remind me"
-  }
+  },
+  "expected_dialog": "schedule.create"
 }
