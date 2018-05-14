@@ -110,7 +110,7 @@ class ReminderSkill(ScheduledCRUDSkill):
 
     def __fix_pronouns(self, utterance):
         msg = utterance.strip()
-        for key, val in self.PRONOUNS.iteritems():
+        for key, val in self.PRONOUNS.items():
             k = key.lower()
             v = val.lower()
             msg = msg.replace(' ' + k + ' ', ' ' + v + ' ')
