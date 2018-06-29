@@ -17,130 +17,102 @@
 
 
 import time
-from alsaaudio import Mixer
 from datetime import datetime, timedelta
+from parsedatetime import Calendar
+from mycroft import MycroftSkill, intent_file_handler
+from mycroft.util.parse import extract_datetime
+from mycroft.util.format import nice_time
+from mycroft.util.log import LOG
 
-import re
-import yaml
-from adapt.intent import IntentBuilder
-from os.path import dirname
-
-from mycroft.skills.scheduled_skills import ScheduledCRUDSkill
-
-__author__ = 'jdorleans'
-
-
-# TODO - Localization, Sandbox
-class ReminderSkill(ScheduledCRUDSkill):
-    PRONOUNS = {'i': 'you', 'me': 'you', 'my': 'your', 'myself': 'yourself',
-                'am': 'are', "'m": "are", "i'm": "you're"}
-
+class ReminderSkill(MycroftSkill):
     def __init__(self):
-        super(ReminderSkill, self).__init__(
-            "ReminderSkill", None)
-        self.reminder_on = False
-        self.max_delay = self.config.get('max_delay')
-        self.repeat_time = self.config.get('repeat_time')
-        self.extended_delay = self.config.get('extended_delay')
+        super(ReminderSkill, self).__init__()
+        self.notes = {}
+        self.primed = False
 
     def initialize(self):
-        super(ReminderSkill, self).initialize()
-        intent = IntentBuilder(
-            'ReminderSkillStopIntent').require('ReminderSkillStopVerb') \
-            .require('ReminderSkillKeyword').build()
-        self.register_intent(intent, self.__handle_stop)
+        self.add_event('speak', self.prime)
+        self.add_event('mycroft.skill.handler.complete', self.notify)
+        self.add_event('mycroft.skill.handler.start', self.reset)
 
-    def load_data(self):
-        try:
-            with self.file_system.open(self.PENDING_TASK, 'r') as f:
-                self.data = yaml.safe_load(f)
-                assert self.data
-        except:
-            self.data = {}
+        self.schedule_repeating_event(self.__check_reminder, datetime.now(),
+                                      120, name='reminder')
 
-    def load_repeat_data(self):
-        try:
-            with self.file_system.open(self.REPEAT_TASK, 'r') as f:
-                self.repeat_data = yaml.safe_load(f)
-                assert self.repeat_data
-        except:
-            self.repeat_data = {}
+    def add_notification(self, identifier, note, expiry):
+        self.notes[identifier] = (note, expiry)
 
-    def __handle_stop(self, message):
-        if self.reminder_on:
-            self.speak_dialog('reminder.off')
-        self.reminder_on = False
+    def prime(self, message):
+        LOG.info('PRIMING NOTIFICATION')
+        self.primed = True
 
-    def notify(self, timestamp):
-        with self.LOCK:
-            if self.data.__contains__(timestamp):
-                volume = None
-                self.reminder_on = True
-                delay = self.__calculate_delay(self.max_delay)
+    def reset(self, message):
+        time.sleep(10)
+        LOG.info('RESETTING NOTIFICATION')
+        self.primed = False
 
-                while self.reminder_on and datetime.now() < delay:
-                    self.speak_dialog(
-                        'reminder.notify',
-                        data=self.build_feedback_payload(timestamp))
-                    time.sleep(1)
-                    self.speak_dialog('reminder.stop')
-                    time.sleep(self.repeat_time)
-                    if not volume and datetime.now() >= delay:
-                        mixer = Mixer()
-                        volume = mixer.getvolume()[0]
-                        mixer.setvolume(100)
-                        delay = self.__calculate_delay(self.extended_delay)
-                if volume:
-                    Mixer().setvolume(volume)
-                self.remove(timestamp)
-                self.reminder_on = False
-                self.save()
+    def notify(self, message):
+        LOG.info('notify: {}'.format(self.primed))
+        handled_reminders = []
+        now = time.time()
+        if self.primed:
+            for r in self.settings.get('reminders', []):
+                print('Checking {}'.format(r))
+                if now > r[1] - 600 and now < r[1]:
+                    handled_reminders.append(r)
+                    self.speak_dialog('by.the.way', data={'reminder': r[0]})
+            self.remove_handled(handled_reminders)
+            self.primed = False
 
-    @staticmethod
-    def __calculate_delay(seconds):
-        return datetime.now() + timedelta(seconds=seconds)
+    def __check_reminder(self, message):
+        self.log.info('Checking reminders')
+        now = time.time()
+        handled_reminders = []
+        for r in self.settings.get('reminders', []):
+            if now > r[1]:
+                self.speak(r[0])
+                handled_reminders.append(r)
+            if now > r[1] - 600:
+                self.add_notification(r[0], r[0], r[1])
+        self.remove_handled(handled_reminders)
 
-    def add(self, date, message):
-        utterance = message.data.get('utterance').lower()
-        utterance = utterance.replace(
-            message.data.get('ReminderSkillCreateVerb'), '')
-        utterance = self.__fix_pronouns(utterance)
-        self.repeat_data[date] = self.time_rules.get_week_days(utterance)
-        self.data[date] = self.__remove_time(utterance).strip()
+    def remove_handled(self, handled_reminders):
+        for r in handled_reminders:
+            self.settings['reminders'].remove(r)
 
-    def __fix_pronouns(self, utterance):
-        msg = utterance.strip()
-        for key, val in self.PRONOUNS.items():
-            k = key.lower()
-            v = val.lower()
-            msg = msg.replace(' ' + k + ' ', ' ' + v + ' ')
-            msg = re.sub('^' + key + ' ', val + ' ', msg)
-            msg = re.sub(' ' + key + '$', ' ' + val, msg)
-        return msg
+    @intent_file_handler('ReminderAt.intent')
+    def add_new_reminder(self, msg=None):
+        print(msg.data)
+        reminder = msg.data.get('reminder', '')
+        reminder.replace(' my ', ' your ')
+        reminder_time = extract_datetime(msg.data['utterance'],
+                                         datetime.now())[0] # start time
+        LOG.info(reminder_time)
+        # convert to UTC
+        self.speak_dialog('SavingReminder',
+                          {'timedate': nice_time(reminder_time)})
 
-    def __remove_time(self, utterance):
-        pos = (0, 0)
-        for regex in self.time_rules.rules.get('time_regex'):
-            pattern = re.compile(regex, re.IGNORECASE)
-            result = pattern.search(utterance)
-            if result:
-                span = result.span()
-                if (pos[1] - pos[0]) < (span[1] - span[0]):
-                    pos = span
-        msg = utterance[:pos[0]] + utterance[pos[1]:]
-        if pos[0] != pos[1]:
-            msg = self.__remove_time(msg)
-        return msg
+        self.__save_reminder_local(reminder, reminder_time)
 
-    def save(self):
-        with self.file_system.open(self.PENDING_TASK, 'w') as f:
-            yaml.safe_dump(self.data, f)
-        with self.file_system.open(self.REPEAT_TASK, 'w') as f:
-            yaml.safe_dump(self.repeat_data, f)
-        self.schedule()
+    @intent_file_handler('ReminderIn.intent')
+    def add__reminder_in(self, msg=None):
+        LOG.info('REMINDER IN!')
+        reminder = msg.data.get('reminder', None)
+        print(reminder)
+        reminder = reminder.replace(' my ', ' your ')
+        print(reminder)
+        reminder_time = Calendar().parseDT(msg.data['timedate'])[0]
+        LOG.info(reminder_time)
+        # convert to UTC
+        self.speak_dialog('SavingReminder',
+                          {'timedate': nice_time(reminder_time)})
+        self.__save_reminder_local(reminder, reminder_time)
 
-    def stop(self):
-        self.__handle_stop(None)
+    def __save_reminder_local(self, reminder, reminder_time):
+        since_epoch = time.mktime(reminder_time.timetuple())
+        if 'reminders' in self.settings:
+            self.settings['reminders'].append((reminder, since_epoch))
+        else:
+            self.settings['reminders'] = [(reminder, since_epoch)]
 
 
 def create_skill():
