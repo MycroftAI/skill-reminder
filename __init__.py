@@ -114,6 +114,14 @@ class ReminderSkill(MycroftSkill):
         else:
             self.settings['reminders'] = [(reminder, since_epoch)]
 
+    @intent_file_handler('DeleteReminderForDay.intent')
+    def remove_reminders_for_day(self, msg=None):
+        if date in msg.data:
+            date = extract_datetime(msg.data['date'])
+        else:
+            date = extract_datetime(msg.data['utterance'])
+        
+
 
 def create_skill():
     return ReminderSkill()

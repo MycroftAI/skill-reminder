@@ -1,0 +1,4 @@
+(cancel|remove|delete) all reminders for {date}
+cancel (todays|tomorrows) reminders
+cancel all reminders for (today|tomorrow)
+
