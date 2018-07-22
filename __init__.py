@@ -103,7 +103,7 @@ class ReminderSkill(MycroftSkill):
                 if now > dt - timedelta(minutes=10) and now < dt and \
                         r[0] not in self.cancellable:
                     handled_reminders.append(r)
-                    self.speak_dialog('by.the.way', data={'reminder': r[0]})
+                    self.speak_dialog('ByTheWay', data={'reminder': r[0]})
                     self.cancellable.append(r[0])
 
             self.primed = False
