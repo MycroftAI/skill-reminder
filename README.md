@@ -1,4 +1,4 @@
-## Reminder Skill
+## Set Reminders
 Set single and repeating reminders for tasks
 
 ## Description 
