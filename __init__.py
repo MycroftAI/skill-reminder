@@ -66,9 +66,12 @@ class ReminderSkill(MycroftSkill):
 
     def initialize(self):
         # Handlers for notifications after speak
-        self.add_event('speak', self.prime)
-        self.add_event('mycroft.skill.handler.complete', self.notify)
-        self.add_event('mycroft.skill.handler.start', self.reset)
+        # TODO Make this work better in test
+        from mycroft.messagebus.client.ws import WebsocketClient
+        if isinstance(self.bus, WebsocketClient):
+            self.add_event('speak', self.prime)
+            self.add_event('mycroft.skill.handler.complete', self.notify)
+            self.add_event('mycroft.skill.handler.start', self.reset)
 
         # Reminder checker event
         self.schedule_repeating_event(self.__check_reminder, datetime.now(),
