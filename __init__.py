@@ -89,7 +89,6 @@ class ReminderSkill(MycroftSkill):
         self.primed = False
 
     def notify(self, message):
-        LOG.info('notify: {}'.format(message.data))
         if self.name in message.data.get('name', ''):
             self.primed = False
             return
@@ -111,7 +110,6 @@ class ReminderSkill(MycroftSkill):
     def __check_reminder(self, message):
         """ Repeating event handler. Checking if a reminder time has been
             reached and presents the reminder. """
-        LOG.debug('Checking reminders')
         now = now_local()
         handled_reminders = []
         for r in self.settings.get('reminders', []):
@@ -310,7 +308,6 @@ class ReminderSkill(MycroftSkill):
             2 minutes. """
         remove_list = []
         for c in self.cancellable:
-            LOG.info(c)
             if self.remove_by_name(c):
                 self.speak_dialog('ReminderRemoved')
                 remove_list.append(c)
