@@ -16,7 +16,6 @@
 import time
 from os.path import dirname, join
 from datetime import datetime, timedelta
-from parsedatetime import Calendar
 from mycroft import MycroftSkill, intent_file_handler
 from mycroft.util.parse import extract_datetime, extract_number, normalize
 from mycroft.util.time import now_local, to_local, to_utc, now_utc
