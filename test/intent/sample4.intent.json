@@ -1,8 +1,5 @@
 {
-  "utterance": "notify me next friday to have dinner with my family",
-  "intent_type": "ReminderSkillCreateIntent",
-  "intent": {
-    "ReminderSkillCreateVerb": "notify me"
-  },
-  "expected_dialog": "schedule.create"
+  "utterance": "notify me to have dinner with my family on friday",
+  "intent_type": "ReminderAt.intent",
+  "settings": {}
 }

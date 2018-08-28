@@ -1,10 +1,4 @@
 {
-  "utterance": "list two reminders",
-  "intent_type": "ReminderSkillListIntent",
-  "intent": {
-    "ReminderSkillListVerb": "list",
-    "ReminderSkillAmount": "2",
-    "ReminderSkillKeyword": "reminders"
-  },
-  "expected_dialog": "schedule.list"
+  "utterance": "what are my reminders for today",
+  "intent_type": "GetRemindersForDay.intent"
 }
