@@ -1,4 +1,4 @@
-# <img src='https://rawgithub.com/FortAwesome/Font-Awesome/master/advanced-options/raw-svg/solid/info.svg ' card_color='#22a7f0' width='50' height='50' style='vertical-align:bottom'/> Set reminders
+# <img src='https://rawgithub.com/FortAwesome/Font-Awesome/master/advanced-options/raw-svg/solid/info.svg' card_color='#22a7f0' width='50' height='50' style='vertical-align:bottom'/> Set reminders
 Set single and repeating reminders for tasks
 
 ## About 
