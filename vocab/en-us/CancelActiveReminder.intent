@@ -1,2 +1,4 @@
-(ok |okay |)cancel the reminder
-(ok |okay |)stop the reminder
+(ok |okay |)cancel (the |my |all |)(active |)reminder(s|)
+(ok |okay |)stop (the | my |all |)(active |)reminder(s|)
+(ok |okay |)remove (the |my |all |)(active |)reminder(s|)
+(ok |okay |)acknowledge (the |my |all |)(active |)reminder(s|)
