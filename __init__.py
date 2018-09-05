@@ -115,7 +115,7 @@ class ReminderSkill(MycroftSkill):
             dt = deserialize(r[1])
             if now > dt:
                 play_wav(REMINDER_PING)
-                self.speak(r[0])
+                self.speak_dialog('Reminding', data={'reminder': r[0]})
                 handled_reminders.append(r)
             if now > dt - timedelta(minutes=10):
                 self.add_notification(r[0], r[0], dt)
@@ -123,15 +123,32 @@ class ReminderSkill(MycroftSkill):
 
     def remove_handled(self, handled_reminders):
         """ The reminder is removed and rescheduled to repeat in 2 minutes.
+
             It is also marked as "cancellable" allowing "cancel current
-             reminder" to remove it.
+            reminder" to remove it.
+
+            Repeats a maximum of 3 times.
         """
         for r in handled_reminders:
+            if len(r) == 3:
+                repeats = r[2] + 1
+            else:
+                repeats = 1
             self.settings['reminders'].remove(r)
-            new_time = deserialize(r[1]) + timedelta(minutes=2)
-            self.settings['reminders'].append((r[0], serialize(new_time)))
-            if r[0] not in self.cancellable:
-                self.cancellable.append(r[0])
+            # If the reminer hasn't been repeated 3 times reschedule it
+            if repeats < 3:
+                self.speak_dialog('ToCancelInstructions')
+                new_time = deserialize(r[1]) + timedelta(minutes=2)
+                self.settings['reminders'].append(
+                        (r[0], serialize(new_time), repeats))
+
+                # Make the reminder cancellable
+                if r[0] not in self.cancellable:
+                    self.cancellable.append(r[0])
+            else:
+                # Do not schedule a repeat and remove the reminder from
+                # the list of cancellable reminders
+                self.cancellable = [c for c in self.cancellable if c != r[0]]
 
     def remove_by_name(self, name):
         for r in self.settings.get('reminders', []):
