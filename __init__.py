@@ -350,6 +350,14 @@ class ReminderSkill(MycroftSkill):
         for c in remove_list:
             self.cancellable.remove(c)
 
+    @intent_file_handler('ClearReminders.intent')
+    def clear_all(self, message):
+        """ Clear all reminders. """
+        if self.ask_yesno('ClearAll') == 'yes':
+            self.__cancel_active()
+            self.settings['reminders'] = []
+            self.speak_dialog('ClearedAll')
+
     def stop(self, message=None):
         if self.__cancel_active():
             self.speak_dialog('ReminderCancelled')
