@@ -318,17 +318,25 @@ class ReminderSkill(MycroftSkill):
             self.speak_dialog('NoUpcoming')
 
 
+    def __cancel_active(self):
+        """ Cancel all active reminders. """
+        remove_list = []
+        ret = len(self.cancellable) > 0  # there were reminders to cancel
+        for c in self.cancellable:
+            if self.remove_by_name(c):
+                remove_list.append(c)
+        for c in remove_list:
+            self.cancellable.remove(c)
+        return ret
+
     @intent_file_handler('CancelActiveReminder.intent')
     def cancel_active(self, message):
         """ Cancel a reminder that's been triggered (and is repeating every
             2 minutes. """
-        remove_list = []
-        for c in self.cancellable:
-            if self.remove_by_name(c):
-                self.speak_dialog('ReminderRemoved')
-                remove_list.append(c)
-        for c in remove_list:
-            self.cancellable.remove(c)
+        if self.__cancel_active():
+            self.speak_dialog('ReminderCancelled')
+        else:
+            self.speak_dialog('NoActive')
 
     @intent_file_handler('SnoozeReminder.intent')
     def snooze_active(self, message):
@@ -341,6 +349,13 @@ class ReminderSkill(MycroftSkill):
                 remove_list.append(c)
         for c in remove_list:
             self.cancellable.remove(c)
+
+    def stop(self, message=None):
+        if self.__cancel_active():
+            self.speak_dialog('ReminderCancelled')
+            return True
+        else:
+            return False
 
 
 def create_skill():
