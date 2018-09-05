@@ -218,7 +218,7 @@ class ReminderSkill(MycroftSkill):
             return self.add_new_reminder(msg)
 
         response = self.get_response('ParticularTime')
-        if is_affirmative(response):
+        if response and is_affirmative(response):
             # Check if a time was also in the response
             dt, rest = extract_datetime(response)
             if rest == normalize(response):
@@ -279,7 +279,7 @@ class ReminderSkill(MycroftSkill):
     @intent_file_handler('GetNextReminders.intent')
     def get_next_reminder(self, msg=None):
         """ Get the first upcoming reminder. """
-        if 'reminders' in self.settings:
+        if len(self.settings.get('reminders', [])) > 0:
             reminders = [(r[0], deserialize(r[1]))
                          for r in self.settings['reminders']]
             next_reminder = sorted(reminders, key=lambda tup: tup[1])[0]
