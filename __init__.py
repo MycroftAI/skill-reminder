@@ -56,6 +56,9 @@ def is_affirmative(utterance, lang='en-us'):
     return False
 
 
+NIGHT_HOURS = [23, 0, 1, 2, 3, 4, 5, 6]
+
+
 class ReminderSkill(MycroftSkill):
     def __init__(self):
         super(ReminderSkill, self).__init__()
@@ -191,6 +194,11 @@ class ReminderSkill(MycroftSkill):
         utterance = msg.data['utterance']
         reminder_time, rest = extract_datetime(utterance, now_local(),
                                               self.lang)
+
+        if reminder_time.hour in NIGHT_HOURS:
+            self.speak_dialog('ItIsNight')
+            if not self.ask_yesno('AreYouSure') == 'yes':
+                return # Don't add if user cancels
 
         if rest != normalize(utterance): # A datetime was extracted
             self.__save_reminder_local(reminder, reminder_time)
