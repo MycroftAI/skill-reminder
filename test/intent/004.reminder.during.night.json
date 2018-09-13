@@ -1,0 +1,7 @@
+{
+  "utterance": "remind me to sleep at 1 a.m.",
+  "intent_type": "ReminderAt.intent",
+  "expected_dialog": "ItIsNight",
+  "responses": ["no"],
+  "settings": {}
+}
