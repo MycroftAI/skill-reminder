@@ -1,0 +1,7 @@
+(напомни|скажи) мне что {reminder} ((во|в) {timedate}|завтра| день после {date})
+добавь новое напоминание {reminder} (во|для) {timedate}
+добавь напоминание {reminder} (во|для) {timedate}
+(напомни|уведоми) мне про {reminder} (в|для) {timedate}
+(напомни|уведоми) мне про {reminder} в {timedate}
+добавь новое напоминание {reminder} в {timedate}
+добавь напоминание {reminder} в {timedate}
