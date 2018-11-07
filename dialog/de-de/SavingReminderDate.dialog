@@ -1,4 +1,4 @@
-Sicher, eine Erinnerung am {{date}} um {{time}} gespeichert
-Ich habe eine Erinnerung an {{date}} um {{time}}
-Erinnerung für {{time}} um {{date}} festgelegt
+Sicher, eine Erinnerung für {{date}} um {{time}} gespeichert
+Ich habe eine Erinnerung für {{date}} {{time}} eingestellt
+Erinnerung eingestellt für {{time}} am {{date}}
 
