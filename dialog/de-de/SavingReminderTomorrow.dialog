@@ -1,3 +1,3 @@
-Sicher, eine Erinnerung für morgen um {{timedate}} gespeichert
-Ich habe eine Erinnerung für morgen {{timedate}} eingestellt
-Erinnerung eingetellt für morgen um {{timedate}}
+Klar, speichere eine Erinnerung für morgen um {{timedate}}
+Ich habe für {{timedate}} morgen eine Erinnerung gesetzt
+Erinnerung gesetzt für morgen um {{timedate}}
