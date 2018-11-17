@@ -1,4 +1,3 @@
-(leere|entferne|lösche) alle erinnerungen für {date}
-entferne (heutige|morgige) erinnerungen
-Alle Erinnerungen für (heute|morgen) löschen
-
+(breche|entferne|lösche) alle Erinnerungen für {date} (ab|)
+breche die (heutigen|morgigen) Erinnerungen ab
+breche alle Erinnerungen für (heute|morgen) ab

@@ -1,3 +1,3 @@
-zeige (die|alle) erinnerungen für {date}
-was sind (die|meine) erinnerungen für {date}
-Habe ich (irgendwelche|noch|) erinnerungen (für|am|) {date}
+zeige (die|alle) Erinnerungen für {date}
+Was sind (die|meine) Erinnerungen für {date}
+Habe ich (irgendwelche|) Erinnerungen( an|) {date}
