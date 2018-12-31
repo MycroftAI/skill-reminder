@@ -1,0 +1,7 @@
+herinner me aan {reminder} (om {timedate}|morgen|de dag na {date})
+voeg een nieuwe herinnering {reminder} toe om {timedate}
+stel een herinnering {reminder} in om {timedate}
+herinner me aan {reminder} om {timedate}
+herinner me aan {reminder} over {timedate}
+voeg een nieuwe herinnering {reminder} toe over {timedate}
+voeg een herinnering toe om te {reminder} over {timedate}
