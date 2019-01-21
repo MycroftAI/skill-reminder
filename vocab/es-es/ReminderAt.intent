@@ -1,0 +1,7 @@
+(recuérdame|notifícame) {reminder} ((a la|a las) {timedate}|mañana|pasado {date})
+(añade|crea) un nuevo recordatorio {reminder} (a la|a las) {timedate}
+(añade|crea) un recordatorio {reminder} (a la|a las) {timedate}
+(recuérdame|notifícame) acerca del {reminder} (a la|a las) {timedate}
+(recuérdame|notifícame) el {reminder} de {timedate}
+(añade|crea) nuevo recordatorio {reminder} en {timedate}
+(añade|crea) un recordatorio {reminder} en {timedate}
