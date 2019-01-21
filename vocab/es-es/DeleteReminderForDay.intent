@@ -1,0 +1,3 @@
+(cancela|borra|elimina) todos los recordatorios de {date}
+cancela los recordatorios de mañana
+cancela todos los recordatorios (de|para) (hoy|mañana)
