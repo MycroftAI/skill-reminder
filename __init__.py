@@ -179,6 +179,15 @@ class ReminderSkill(MycroftSkill):
         self.settings['reminders'].append((r[0], serialized))
         return True
 
+    def date_str(self, d):
+        if is_today(d):
+            return 'today'
+        elif is_tomorrow(d):
+            return 'tomorrow'
+        else:
+            return nice_date(date.date())
+
+
     @intent_file_handler('ReminderAt.intent')
     def add_new_reminder(self, msg=None):
         """ Handler for adding  a reminder with a name at a specific time. """
@@ -276,10 +285,20 @@ class ReminderSkill(MycroftSkill):
         else:
             date, _ = extract_datetime(msg.data['utterance'], lang=self.lang)
 
-        if 'reminders' in self.settings:
-            self.settings['reminders'] = [
-                    r for r in self.settings['reminders']
-                    if deserialize(r[1]).date() != date.date()]
+        date_str = self.date_str(date)
+        # If no reminders exists for the provided date return;
+        for r in self.settings['reminders']:
+            if deserialize(r[1]).date() == date.date():
+                break
+        else:  # Let user know that no reminders were removed
+            self.speak_dialog('NoRemindersForDate', {'date': date_str})
+            return
+
+        if self.ask_yesno('ConfirmRemoveDay', data={'date': date_str}) == 'yes':
+            if 'reminders' in self.settings:
+                self.settings['reminders'] = [
+                        r for r in self.settings['reminders']
+                        if deserialize(r[1]).date() != date.date()]
 
     @intent_file_handler('GetRemindersForDay.intent')
     def get_reminders_for_day(self, msg=None):
