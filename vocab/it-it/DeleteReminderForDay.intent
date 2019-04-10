@@ -1,0 +1,3 @@
+(cancella|rimuovi|elimina) tutti i promemoria del {date}
+cancella i promemoria di (oggi|domani)
+cancella tutti i promemoria per (oggi|domani)
