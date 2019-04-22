@@ -14,9 +14,10 @@
 
 
 import time
+from adapt.intent import IntentBuilder
 from os.path import dirname, join
 from datetime import datetime, timedelta
-from mycroft import MycroftSkill, intent_file_handler
+from mycroft import MycroftSkill,  intent_handler, intent_file_handler
 from mycroft.util.parse import extract_datetime, extract_number, normalize
 from mycroft.util.time import now_local, to_local, to_utc, now_utc
 from mycroft.util.format import nice_time, nice_date
@@ -44,12 +45,12 @@ def is_tomorrow(d):
     return d.date() == now_local().date() + timedelta(days=1)
 
 
-def contains_datetime(utterance, lang='en-us'):
-    return extract_datetime(utterance)[1] != normalize(utterance)
+def contains_datetime(datetime, lang='ar-sa'):
+    return extract_datetime(datetime)
 
 
-def is_affirmative(utterance, lang='en-us'):
-    affirmatives = ['yes', 'sure', 'please do']
+def is_affirmative(utterance, lang='ar-sa'):
+    affirmatives = ['نعم', 'ايه', 'اكيد']
     for word in affirmatives:
         if word in utterance:
             return True
@@ -181,53 +182,50 @@ class ReminderSkill(MycroftSkill):
 
     def date_str(self, d):
         if is_today(d):
-            return 'today'
+            return 'اليوم'
         elif is_tomorrow(d):
-            return 'tomorrow'
+            return 'بكره'
         else:
             return nice_date(date.date())
 
-
-    @intent_file_handler('ReminderAt.intent')
-    def add_new_reminder(self, msg=None):
+    @intent_handler(IntentBuilder("").require("ReminderAt").optionally("ReminderName").require("DateTime"))
+    def add_new_reminder(self, msg):
         """ Handler for adding  a reminder with a name at a specific time. """
-        reminder = msg.data.get('reminder', None)
+        
+
+        reminder = msg.data.get("ReminderName")
+        
         if reminder is None:
             return self.add_unnamed_reminder_at(msg)
+            
 
-        # mogrify the response TODO: betterify!
-        reminder = (' ' + reminder).replace(' my ', ' your ').strip()
-        reminder = (' ' + reminder).replace(' our ', ' your ').strip()
-        utterance = msg.data['utterance']
-        reminder_time, rest = extract_datetime(utterance, now_local(),
-                                              self.lang)
-
+        datetime = msg.data.get("DateTime")
+        print(datetime)
+          
+        reminder_time,rest = extract_datetime(datetime, now_local(),
+                                            self.lang)
+        
+        print(serialize(reminder_time))
         if reminder_time.hour in self.NIGHT_HOURS:
             self.speak_dialog('ItIsNight')
-            if not self.ask_yesno('AreYouSure') == 'yes':
+            if not self.ask_yesno('AreYouSure')=='نعم':
                 return # Don't add if user cancels
+            else:
 
-        if rest != normalize(utterance): # A datetime was extracted
-            self.__save_reminder_local(reminder, reminder_time)
-        else:
-            self.speak_dialog('NoDateTime')
+                self.__save_reminder_local(reminder, reminder_time)
+
+        self.__save_reminder_local(reminder, reminder_time)
 
     def __save_reminder_local(self, reminder, reminder_time):
         """ Speak verification and store the reminder. """
         # Choose dialog depending on the date
-        if is_today(reminder_time):
-            self.speak_dialog('SavingReminder',
-                              {'timedate': nice_time(reminder_time)})
-        elif is_tomorrow(reminder_time):
-            self.speak_dialog('SavingReminderTomorrow',
-                              {'timedate': nice_time(reminder_time)})
-        else:
-            self.speak_dialog('SavingReminderDate',
-                              {'time': nice_time(reminder_time),
-                               'date': nice_date(reminder_time)})
+
+        self.speak_dialog('SavingReminder')
+        self.speak(serialize(reminder_time))
 
         # Store reminder
         serialized = serialize(reminder_time)
+
         if 'reminders' in self.settings:
             self.settings['reminders'].append((reminder, serialized))
         else:
@@ -239,51 +237,51 @@ class ReminderSkill(MycroftSkill):
         else:
             self.settings['unspec'] = [reminder]
 
-    @intent_file_handler('Reminder.intent')
+        self.speak_dialog('SavingReminder')
+
+    @intent_handler(IntentBuilder("").require("ReminderAt").require("ReminderName").optionally("DateTime"))
     def add_unspecified_reminder(self, msg=None):
         """ Starts a dialog to add a reminder when no time was supplied
             for the reminder.
         """
-        reminder = msg.data['reminder']
+        reminder = msg.data.get("ReminderName")
         # Handle the case where padatious misses the time/date
-        if contains_datetime(msg.data['utterance']):
+        if msg.data.get("DateTime") is not None:
             return self.add_new_reminder(msg)
 
-        response = self.get_response('ParticularTime')
-        if response and is_affirmative(response):
-            # Check if a time was also in the response
-            dt, rest = extract_datetime(response)
-            if rest == normalize(response):
-                # No time found in the response
-                response = self.get_response('SpecifyTime')
-                dt, rest = extract_datetime(response)
-                if rest == response:
-                    self.speak('Fine, be that way')
-                    return
+        elif msg.data.get("DateTime") is None:
+            response1 = self.get_response('ParticularTime')
+            if response1 and is_affirmative(response1):
+                # Get the time
+                response2 = self.get_response('SpecifyTime')
+                dt, rest = extract_datetime(response2)
+                if dt is not None:
+                    self.speak('حسنا')
+                    self.__save_reminder_local(reminder, dt)
+            else:
+                LOG.debug('put into general reminders')
+                self.__save_unspecified_reminder(reminder)
 
-            self.__save_reminder_local(reminder, dt)
-        else:
-            LOG.debug('put into general reminders')
-            self.__save_unspecified_reminder(reminder)
 
-    @intent_file_handler('UnspecifiedReminderAt.intent')
     def add_unnamed_reminder_at(self, msg=None):
         """ Handles the case where a time was given but no reminder
             name was added.
         """
-        utterance = msg.data['timedate']
-        reminder_time, _ = extract_datetime(utterance, now_local(), self.lang)
-        response = self.get_response('AboutWhat')
-        if response and reminder_time:
-            self.__save_reminder_local(response, reminder_time)
 
-    @intent_file_handler('DeleteReminderForDay.intent')
+        utterance = msg.data.get("DateTime")
+        reminder_time, _ = extract_datetime(utterance, now_local(), self.lang)
+
+        if msg.data.get("ReminderName") is None:
+
+            response = self.get_response('AboutWhat')
+            if response and reminder_time:
+                self.__save_reminder_local(response, reminder_time)
+
+    @intent_handler(IntentBuilder("").require("DeleteReminderForDay").require("Date"))
     def remove_reminders_for_day(self, msg=None):
         """ Remove all reminders for the specified date. """
-        if 'date' in msg.data:
-            date, _ = extract_datetime(msg.data['date'], lang=self.lang)
-        else:
-            date, _ = extract_datetime(msg.data['utterance'], lang=self.lang)
+        if msg.data.get("Date") is not None:
+            date, _= extract_datetime(msg.data.get("Date"), lang=self.lang)
 
         date_str = self.date_str(date)
         # If no reminders exists for the provided date return;
@@ -294,19 +292,20 @@ class ReminderSkill(MycroftSkill):
             self.speak_dialog('NoRemindersForDate', {'date': date_str})
             return
 
-        if self.ask_yesno('ConfirmRemoveDay', data={'date': date_str}) == 'yes':
+        if self.ask_yesno('ConfirmRemoveDay', data={'date': date_str}) == 'نعم':
             if 'reminders' in self.settings:
                 self.settings['reminders'] = [
                         r for r in self.settings['reminders']
                         if deserialize(r[1]).date() != date.date()]
+                self.speak_dialog('ClearedAll')
 
-    @intent_file_handler('GetRemindersForDay.intent')
+
+    @intent_handler(IntentBuilder("").require("GetRemindersForDay").require("Date"))
     def get_reminders_for_day(self, msg=None):
         """ List all reminders for the specified date. """
-        if 'date' in msg.data:
-            date, _ = extract_datetime(msg.data['date'], lang=self.lang)
-        else:
-            date, _ = extract_datetime(msg.data['utterance'], lang=self.lang)
+        if msg.data.get("Date") is not None:
+            date, _ = extract_datetime(msg.data.get("Date"), lang=self.lang)
+
 
         if 'reminders' in self.settings:
             reminders = [r for r in self.settings['reminders']
@@ -314,7 +313,7 @@ class ReminderSkill(MycroftSkill):
             if len(reminders) > 0:
                 for r in reminders:
                     reminder, dt = (r[0], deserialize(r[1]))
-                    self.speak(reminder + ' at ' + nice_time(dt))
+                    self.speak(reminder + nice_time(dt))
                 return
         self.speak_dialog('NoUpcoming')
 
@@ -378,7 +377,7 @@ class ReminderSkill(MycroftSkill):
     @intent_file_handler('ClearReminders.intent')
     def clear_all(self, message):
         """ Clear all reminders. """
-        if self.ask_yesno('ClearAll') == 'yes':
+        if self.ask_yesno('ClearAll') == 'نعم':
             self.__cancel_active()
             self.settings['reminders'] = []
             self.speak_dialog('ClearedAll')
