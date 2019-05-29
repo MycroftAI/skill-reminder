@@ -1,0 +1,7 @@
+(rappelle|notifie) moi de {reminder} ((à|le) {timedate}|demain|le jour après {date})
+ajoute un nouveau rappel {reminder} (à|le) {timedate}
+ajoute un rappel {reminder} (à|le) {timedate}
+(rappelle|notifie) moi à propos de {reminder} (à|le) {timedate}
+(rappelle|notifie) moi de {reminder} dans {timedate}
+ajoute un nouveau rappel {reminder} (à|le) {timedate}
+ajoute un nouveau rappel {reminder} (à|le) {timedate}
