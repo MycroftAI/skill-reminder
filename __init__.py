@@ -8,7 +8,7 @@
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# WITHOUT WARRANTIES OR CONDITIONnice_date_timeS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 from mycroft import MycroftSkill,  intent_handler, intent_file_handler
 from mycroft.util.parse import extract_datetime, extract_number, normalize
 from mycroft.util.time import now_local, to_local, to_utc, now_utc
-from mycroft.util.format import nice_time, nice_date
+from mycroft.util.format import nice_time, nice_date, nice_date_time
 from mycroft.util.log import LOG
 from mycroft.util import play_wav
 
@@ -210,9 +210,7 @@ class ReminderSkill(MycroftSkill):
             self.speak_dialog('ItIsNight')
             if not self.ask_yesno('AreYouSure')=='نعم':
                 return # Don't add if user cancels
-            else:
 
-                self.__save_reminder_local(reminder, reminder_time)
 
         self.__save_reminder_local(reminder, reminder_time)
 
@@ -220,8 +218,9 @@ class ReminderSkill(MycroftSkill):
         """ Speak verification and store the reminder. """
         # Choose dialog depending on the date
 
-        self.speak_dialog('SavingReminder')
-        self.speak(serialize(reminder_time))
+        self.speak_dialog('SavingReminder', {'timedate': nice_date_time(reminder_time, self.lang, now=now_local(), use_24hour=False,
+                   use_ampm=True)})
+
 
         # Store reminder
         serialized = serialize(reminder_time)
