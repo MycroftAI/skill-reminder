@@ -22,6 +22,7 @@ from mycroft.util.time import now_local, to_local, to_utc, now_utc
 from mycroft.util.format import nice_time, nice_date
 from mycroft.util.log import LOG
 from mycroft.util import play_wav
+from mycroft.messagebus.client.ws import WebsocketClient
 
 REMINDER_PING = join(dirname(__file__), 'twoBeep.wav')
 
@@ -68,11 +69,10 @@ class ReminderSkill(MycroftSkill):
     def initialize(self):
         # Handlers for notifications after speak
         # TODO Make this work better in test
-        from mycroft.messagebus.client.ws import WebsocketClient
         if isinstance(self.bus, WebsocketClient):
-            self.add_event('speak', self.prime)
-            self.add_event('mycroft.skill.handler.complete', self.notify)
-            self.add_event('mycroft.skill.handler.start', self.reset)
+            self.bus.on('speak', self.prime)
+            self.bus.on('mycroft.skill.handler.complete', self.notify)
+            self.bus.on('mycroft.skill.handler.start', self.reset)
 
         # Reminder checker event
         self.schedule_repeating_event(self.__check_reminder, datetime.now(),
@@ -82,13 +82,14 @@ class ReminderSkill(MycroftSkill):
         self.notes[identifier] = (note, expiry)
 
     def prime(self, message):
+        time.sleep(1)
         self.primed = True
 
     def reset(self, message):
-        time.sleep(10)
         self.primed = False
 
     def notify(self, message):
+        time.sleep(10)
         if self.name in message.data.get('name', ''):
             self.primed = False
             return
@@ -389,6 +390,12 @@ class ReminderSkill(MycroftSkill):
             return True
         else:
             return False
+
+    def shutdown(self):
+        if isinstance(self.bus, WebsocketClient):
+            self.bus.remove('speak', self.prime)
+            self.bus.remove('mycroft.skill.handler.complete', self.notify)
+            self.bus.remove('mycroft.skill.handler.start', self.reset)
 
 
 def create_skill():
