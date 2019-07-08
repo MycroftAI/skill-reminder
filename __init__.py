@@ -17,8 +17,8 @@ import time
 from os.path import dirname, join
 from datetime import datetime, timedelta
 from mycroft import MycroftSkill, intent_file_handler
-from mycroft.util.parse import extract_datetime, extract_number, normalize
-from mycroft.util.time import now_local, to_local, to_utc, now_utc
+from mycroft.util.parse import extract_datetime, normalize
+from mycroft.util.time import now_local
 from mycroft.util.format import nice_time, nice_date
 from mycroft.util.log import LOG
 from mycroft.util import play_wav
@@ -186,8 +186,7 @@ class ReminderSkill(MycroftSkill):
         elif is_tomorrow(d):
             return 'tomorrow'
         else:
-            return nice_date(date.date())
-
+            return nice_date(d.date())
 
     @intent_file_handler('ReminderAt.intent')
     def add_new_reminder(self, msg=None):
@@ -201,14 +200,14 @@ class ReminderSkill(MycroftSkill):
         reminder = (' ' + reminder).replace(' our ', ' your ').strip()
         utterance = msg.data['utterance']
         reminder_time, rest = extract_datetime(utterance, now_local(),
-                                              self.lang)
+                                               self.lang)
 
         if reminder_time.hour in self.NIGHT_HOURS:
             self.speak_dialog('ItIsNight')
             if not self.ask_yesno('AreYouSure') == 'yes':
-                return # Don't add if user cancels
+                return  # Don't add if user cancels
 
-        if rest != normalize(utterance): # A datetime was extracted
+        if rest != normalize(utterance):  # A datetime was extracted
             self.__save_reminder_local(reminder, reminder_time)
         else:
             self.speak_dialog('NoDateTime')
@@ -295,7 +294,8 @@ class ReminderSkill(MycroftSkill):
             self.speak_dialog('NoRemindersForDate', {'date': date_str})
             return
 
-        if self.ask_yesno('ConfirmRemoveDay', data={'date': date_str}) == 'yes':
+        answer = self.ask_yesno('ConfirmRemoveDay', data={'date': date_str})
+        if answer == 'yes':
             if 'reminders' in self.settings:
                 self.settings['reminders'] = [
                         r for r in self.settings['reminders']
@@ -342,7 +342,6 @@ class ReminderSkill(MycroftSkill):
                                         'reminder': next_reminder[0]})
         else:
             self.speak_dialog('NoUpcoming')
-
 
     def __cancel_active(self):
         """ Cancel all active reminders. """
