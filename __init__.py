@@ -50,7 +50,7 @@ def contains_datetime(datetime, lang='ar-sa'):
 
 
 def is_affirmative(utterance, lang='ar-sa'):
-    affirmatives = ['نعم', 'ايه', 'اكيد']
+    affirmatives = ['نعم', 'ايه', 'اكيد','اي']
     for word in affirmatives:
         if word in utterance:
             return True
@@ -217,7 +217,7 @@ class ReminderSkill(MycroftSkill):
     def __save_reminder_local(self, reminder, reminder_time):
         """ Speak verification and store the reminder. """
         # Choose dialog depending on the date
-
+        
         self.speak_dialog('SavingReminder', {'timedate': nice_date_time(reminder_time, self.lang, now=now_local(), use_24hour=False,
                    use_ampm=True)})
 
@@ -236,7 +236,7 @@ class ReminderSkill(MycroftSkill):
         else:
             self.settings['unspec'] = [reminder]
 
-        self.speak_dialog('SavingReminder')
+        self.speak_dialog('SavingReminderUnspec')
 
     @intent_handler(IntentBuilder("").require("ReminderAt").require("ReminderName").optionally("DateTime"))
     def add_unspecified_reminder(self, msg=None):
@@ -254,6 +254,7 @@ class ReminderSkill(MycroftSkill):
                 # Get the time
                 response2 = self.get_response('SpecifyTime')
                 dt, rest = extract_datetime(response2)
+                print(dt)
                 if dt is not None:
                     self.speak('حسنا')
                     self.__save_reminder_local(reminder, dt)
@@ -302,6 +303,7 @@ class ReminderSkill(MycroftSkill):
     @intent_handler(IntentBuilder("").require("GetRemindersForDay").require("Date"))
     def get_reminders_for_day(self, msg=None):
         """ List all reminders for the specified date. """
+        print("hello")
         if msg.data.get("Date") is not None:
             date, _ = extract_datetime(msg.data.get("Date"), lang=self.lang)
 
@@ -312,7 +314,7 @@ class ReminderSkill(MycroftSkill):
             if len(reminders) > 0:
                 for r in reminders:
                     reminder, dt = (r[0], deserialize(r[1]))
-                    self.speak(reminder + nice_time(dt))
+                    self.speak(reminder +" "+ nice_time(dt))
                 return
         self.speak_dialog('NoUpcoming')
 
