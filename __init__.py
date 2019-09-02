@@ -22,7 +22,7 @@ from mycroft.util.time import now_local
 from mycroft.util.format import nice_time, nice_date
 from mycroft.util.log import LOG
 from mycroft.util import play_wav
-from mycroft.messagebus.client.ws import WebsocketClient
+from mycroft.messagebus.client import MessageBusClient
 
 REMINDER_PING = join(dirname(__file__), 'twoBeep.wav')
 
@@ -69,7 +69,7 @@ class ReminderSkill(MycroftSkill):
     def initialize(self):
         # Handlers for notifications after speak
         # TODO Make this work better in test
-        if isinstance(self.bus, WebsocketClient):
+        if isinstance(self.bus, MessageBusClient):
             self.bus.on('speak', self.prime)
             self.bus.on('mycroft.skill.handler.complete', self.notify)
             self.bus.on('mycroft.skill.handler.start', self.reset)
