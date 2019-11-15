@@ -1,4 +1,4 @@
-(ok |okay |)cancella (il |mio |tutti |)promemoria (attivo|attivi|)
-(ok |okay |)ferma (il |mio |tutti |)promemoria (attivo |attivi |)
-(ok |okay |)rimuovi (il |mio |tutti |)promemoria (attivo |attivi |)
-(ok |okay |)riconosci (il |mio |tutti |)promemoria(attivo|attivi|)
+(|ok|okay|va bene) cancella (|il|il mio|i miei|tutti) promemoria (|attivo|attivi)
+(|ok|okay|va bene) ferma (|il|il mio|i miei|tutti) promemoria (|attivo|attivi)
+(|ok|okay|va bene) rimuovi (|il|il mio|i miei|tutti) promemoria (|attivo|attivi)
+(|ok|okay|va bene) riconosci (|il|il mio|i miei|tutti) promemoria (|attivo|attivi)
