@@ -1,0 +1,7 @@
+(lembrar|notificar) me para {reminder} ((às|em) {timedate}|amanhã|o dia após {date})
+adicionar um novo lembrete {reminder} (às|em) {timedate}
+adicionar um lembrete para {reminder} (às|em) {timedate}
+(lembrar|notificar) me sobre {reminder} (às|em) {timedate}
+(lembrar|notificar) me para {reminder} em {timedate}
+adicionar um novo lembrete {reminder} em {timedate}
+adicionar um lembrete para {reminder} em {timedate}

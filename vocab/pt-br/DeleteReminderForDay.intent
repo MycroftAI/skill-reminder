@@ -1,0 +1,3 @@
+(cancelar|remover|apagar|cancele|apague|remova) todos os lembretes de {date}
+(cancelar|cancele) os lembretes (para|de) (hoje|amanhã)
+(cancelar|cancele) todos os lembretes (de|para) (hoje|amanhã)

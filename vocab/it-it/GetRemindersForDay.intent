@@ -1,3 +1,3 @@
 dammi (i|tutti) promemoria per {date}
 quali sono (i|miei) promemoria per {date}
-ho qualche promemoria(per il|) {date}
+ho qualche promemoria (|il|per il) {date}
