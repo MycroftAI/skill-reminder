@@ -1,0 +1,7 @@
+(påminn|meddela) mig om {reminder} ((vid|på) {timedate}|imorgon|dagen efter {date})
+lägg till ny påminnelse {reminder} (vid|på) {timedate}
+lägg till en påminnelse till {reminder} (vid|på) {timedate}
+(påminn|meddela) mig om {reminder} (vid|på) {timedate}
+(påminn|meddela) mig {reminder} på {timedate}
+lägg till ny påminnelse {reminder} på {timedate}
+lägg till en påminnelse till {reminder} på {timedate}
