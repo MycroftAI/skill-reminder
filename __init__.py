@@ -28,6 +28,7 @@ REMINDER_PING = join(dirname(__file__), 'twoBeep.wav')
 
 MINUTES = 60  # seconds
 
+DEFAULT_TIME = now_local().replace(hour=8, minute=0, second=0)
 
 def deserialize(dt):
     return datetime.strptime(dt, '%Y%d%m-%H%M%S-%z')
@@ -46,7 +47,7 @@ def is_tomorrow(d):
 
 
 def contains_datetime(utterance, lang='en-us'):
-    return extract_datetime(utterance)[1] != normalize(utterance)
+    return extract_datetime(utterance) is not None
 
 
 def is_affirmative(utterance, lang='en-us'):
@@ -199,15 +200,17 @@ class ReminderSkill(MycroftSkill):
         reminder = (' ' + reminder).replace(' my ', ' your ').strip()
         reminder = (' ' + reminder).replace(' our ', ' your ').strip()
         utterance = msg.data['utterance']
-        reminder_time, rest = extract_datetime(utterance, now_local(),
-                                               self.lang)
+        reminder_time, rest = (extract_datetime(utterance, now_local(),
+                                                self.lang,
+                                                default_time=DEFAULT_TIME) or
+                               (None, None))
 
         if reminder_time.hour in self.NIGHT_HOURS:
             self.speak_dialog('ItIsNight')
             if not self.ask_yesno('AreYouSure') == 'yes':
                 return  # Don't add if user cancels
 
-        if rest != normalize(utterance):  # A datetime was extracted
+        if reminder_time:  # A datetime was extracted
             self.__save_reminder_local(reminder, reminder_time)
         else:
             self.speak_dialog('NoDateTime')
@@ -252,12 +255,12 @@ class ReminderSkill(MycroftSkill):
         response = self.get_response('ParticularTime')
         if response and is_affirmative(response):
             # Check if a time was also in the response
-            dt, rest = extract_datetime(response)
-            if rest == normalize(response):
+            dt, rest = extract_datetime(response) or (None, None)
+            if dt:
                 # No time found in the response
                 response = self.get_response('SpecifyTime')
-                dt, rest = extract_datetime(response)
-                if rest == response:
+                dt, rest = extract_datetime(response) or None, None
+                if dt:
                     self.speak('Fine, be that way')
                     return
 
@@ -272,7 +275,10 @@ class ReminderSkill(MycroftSkill):
             name was added.
         """
         utterance = msg.data['timedate']
-        reminder_time, _ = extract_datetime(utterance, now_local(), self.lang)
+        reminder_time, _ = (extract_datetime(utterance, now_local(), self.lang,
+                                             default_time=DEFAULT_TIME) or
+                            (None, None))
+
         response = self.get_response('AboutWhat')
         if response and reminder_time:
             self.__save_reminder_local(response, reminder_time)
@@ -285,7 +291,7 @@ class ReminderSkill(MycroftSkill):
         else:
             date, _ = extract_datetime(msg.data['utterance'], lang=self.lang)
 
-        date_str = self.date_str(date)
+        date_str = self.date_str(date or now_local().date())
         # If no reminders exists for the provided date return;
         for r in self.settings['reminders']:
             if deserialize(r[1]).date() == date.date():
