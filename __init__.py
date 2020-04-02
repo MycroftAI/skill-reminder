@@ -397,7 +397,7 @@ class ReminderSkill(MycroftSkill):
             return False
 
     def shutdown(self):
-        if isinstance(self.bus, WebsocketClient):
+        if isinstance(self.bus, MessageBusClient):
             self.bus.remove('speak', self.prime)
             self.bus.remove('mycroft.skill.handler.complete', self.notify)
             self.bus.remove('mycroft.skill.handler.start', self.reset)
