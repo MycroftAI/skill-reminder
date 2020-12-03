@@ -1,0 +1,7 @@
+(przypomnij|zgłoś) mi {reminder} ((na|){timedate}|jutro|dzień po {date})
+dodaj nowe przypomnienie {reminder} (na|) {timedate}
+dodaj przypomnienie {reminder} (na|) {timedate}
+(przypomnij|powiadom) (mi|mnie) o {reminder} (o|na) {timedate}
+(przypomnij|powiadom) (mi|mnie) żeby(m|) {reminder} na {timedate}
+dodaj nowe przypomnienie {reminder} na {timedate}
+dodaj przypomnienie żeby {reminder} na {timedate}

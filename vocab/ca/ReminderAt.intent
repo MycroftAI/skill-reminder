@@ -1,0 +1,7 @@
+(recorda'm|notifica'm) {reminder} ((a la|a les) {timedate}|demà|demà passat {date})
+afegeix un nou recordatori {reminder} (a la|a les) {timedate}
+afegeix un recordatori {reminder} (a la|a les) {timedate}
+(recorda'm|notifica'm) sobre {reminder} (a la|a les) {timedate}
+(recorda'm|notifica'm) {reminder} (a la|a les) {timedate}
+crea un nou recordatori {reminder} (a la|a les) {timedate}
+afegeix un recordatori a {reminder} (a la|a les) {timedate}
