@@ -1,7 +1,8 @@
-(erinner|benachrichtige) mich (an|über) {reminder} ((um|am) {timedate}|morgen|nach {date})
+(erinner|erinnere|benachrichtige) mich (an|über) {reminder} ((um|am) {timedate}|morgen|nach {date})
 füge (eine|) neue Erinnerung {reminder} (um|für) {timedate} hinzu
 füge eine Erinnerung (für|zu) {reminder} (um|für) {timedate} hinzu
 (erinner|benachrichtige) mich über {reminder} (um|am) {timedate}
 (erinner|benachrichtige) mich zu {reminder} am {timedate}
+(erinner|erinnere) mich um {timedate} an {reminder}
 Füge (eine|) neue Erinnerung {reminder} in {timedate} hinzu
-füge (eine|) erinnerung {reminder} am {timedate} (hinzu|)
+füge (eine|) erinnerung {reminder} (am|um) {timedate} (hinzu|)
