@@ -50,14 +50,6 @@ def contains_datetime(utterance, lang='en-us'):
     return extract_datetime(utterance) is not None
 
 
-def is_affirmative(utterance, lang='en-us'):
-    affirmatives = ['yes', 'sure', 'please do']
-    for word in affirmatives:
-        if word in utterance:
-            return True
-    return False
-
-
 class ReminderSkill(MycroftSkill):
     def __init__(self):
         super(ReminderSkill, self).__init__()
@@ -242,6 +234,9 @@ class ReminderSkill(MycroftSkill):
         else:
             self.settings['unspec'] = [reminder]
 
+    def response_is_negative(self, response):
+        return self.voc_match(response, 'no', self.lang)
+
     @intent_file_handler('Reminder.intent')
     def add_unspecified_reminder(self, msg=None):
         """ Starts a dialog to add a reminder when no time was supplied
@@ -253,14 +248,14 @@ class ReminderSkill(MycroftSkill):
             return self.add_new_reminder(msg)
 
         response = self.get_response('ParticularTime')
-        if response and is_affirmative(response):
+        if response and not self.response_is_negative(response):
             # Check if a time was also in the response
             dt, rest = extract_datetime(response) or (None, None)
-            if dt:
+            if not dt:
                 # No time found in the response
                 response = self.get_response('SpecifyTime')
                 dt, rest = extract_datetime(response) or None, None
-                if dt:
+                if not dt:
                     self.speak('Fine, be that way')
                     return
 
