@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import re
 import time
 from os.path import dirname, join
 from datetime import datetime, timedelta
@@ -182,6 +182,22 @@ class ReminderSkill(MycroftSkill):
         else:
             return nice_date(d.date())
 
+    def change_pronouns(self, reminder):
+        """Change my / our into you / your, etc.
+
+        This would change "my dentist appointment" to
+        "your dentist appointment" when Mycroft refers to the reminder.
+
+        Arguments:
+            reminder (str): reminder text
+        """
+        my_regex = r'\b{}\b'.format(self.translate('My'))
+        our_regex = r'\b{}\b'.format(self.translate('Our'))
+        your_word = self.translate('Your')
+        reminder = re.sub(my_regex, your_word, reminder)
+        reminder = re.sub(our_regex, your_word, reminder)
+        return reminder
+
     @intent_handler('ReminderAt.intent')
     def add_new_reminder(self, msg=None):
         """Handler for adding  a reminder with a name at a specific time."""
@@ -190,8 +206,7 @@ class ReminderSkill(MycroftSkill):
             return self.add_unnamed_reminder_at(msg)
 
         # mogrify the response TODO: betterify!
-        reminder = (' ' + reminder).replace(' my ', ' your ').strip()
-        reminder = (' ' + reminder).replace(' our ', ' your ').strip()
+        reminder = self.change_pronouns(reminder)
         utterance = msg.data['utterance']
         reminder_time, rest = (extract_datetime(utterance, now_local(),
                                                 self.lang,
