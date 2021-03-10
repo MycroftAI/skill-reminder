@@ -176,9 +176,9 @@ class ReminderSkill(MycroftSkill):
 
     def date_str(self, d):
         if is_today(d):
-            return 'today'
+            return self.translate('Today')
         elif is_tomorrow(d):
-            return 'tomorrow'
+            return self.translate('Tomorrow')
         else:
             return nice_date(d.date())
 
