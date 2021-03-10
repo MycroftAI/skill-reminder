@@ -256,7 +256,7 @@ class ReminderSkill(MycroftSkill):
                 response = self.get_response('SpecifyTime') or ''
                 dt, rest = extract_datetime(response) or None, None
                 if not dt:
-                    self.speak('Fine, be that way')
+                    self.speak_dialog('Fine')
                     return
 
             self.__save_reminder_local(reminder, dt)
@@ -315,7 +315,8 @@ class ReminderSkill(MycroftSkill):
             if len(reminders) > 0:
                 for r in reminders:
                     reminder, dt = (r[0], deserialize(r[1]))
-                    self.speak(reminder + ' at ' + nice_time(dt))
+                    dialog_data = {'reminder': reminder, 'time': nice_time(dt)}
+                    self.speak_dialog('ReminderAtTime', data=dialog_data)
                 return
         self.speak_dialog('NoUpcoming')
 
