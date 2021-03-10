@@ -16,11 +16,10 @@
 import time
 from os.path import dirname, join
 from datetime import datetime, timedelta
-from mycroft import MycroftSkill, intent_file_handler
+from mycroft import MycroftSkill, intent_handler
 from mycroft.util.parse import extract_datetime, normalize
 from mycroft.util.time import now_local
 from mycroft.util.format import nice_time, nice_date
-from mycroft.util.log import LOG
 from mycroft.util import play_wav
 from mycroft.messagebus.client import MessageBusClient
 
@@ -102,8 +101,10 @@ class ReminderSkill(MycroftSkill):
             self.primed = False
 
     def __check_reminder(self, message):
-        """ Repeating event handler. Checking if a reminder time has been
-            reached and presents the reminder. """
+        """Repeating event handler.
+
+        Checking if a reminder time has been reached and presents the reminder.
+        """
         now = now_local()
         handled_reminders = []
         for r in self.settings.get('reminders', []):
@@ -117,12 +118,12 @@ class ReminderSkill(MycroftSkill):
         self.remove_handled(handled_reminders)
 
     def remove_handled(self, handled_reminders):
-        """ The reminder is removed and rescheduled to repeat in 2 minutes.
+        """The reminder is removed and rescheduled to repeat in 2 minutes.
 
-            It is also marked as "cancellable" allowing "cancel current
-            reminder" to remove it.
+        It is also marked as "cancellable" allowing "cancel current
+        reminder" to remove it.
 
-            Repeats a maximum of 3 times.
+        Repeats a maximum of 3 times.
         """
         for r in handled_reminders:
             if len(r) == 3:
@@ -155,13 +156,13 @@ class ReminderSkill(MycroftSkill):
         return True  # Matching reminder was found and removed
 
     def reschedule_by_name(self, name, new_time):
-        """ Reschedule the reminder by it's name
+        """Reschedule the reminder by it's name
 
-            Arguments:
-                name:       Name of reminder to reschedule.
-                new_time:   New time for the reminder.
+        Arguments:
+            name:       Name of reminder to reschedule.
+            new_time:   New time for the reminder.
 
-            Returns (Bool): True if a reminder was found.
+        Returns (Bool): True if a reminder was found.
         """
         serialized = serialize(new_time)
         for r in self.settings.get('reminders', []):
@@ -181,9 +182,9 @@ class ReminderSkill(MycroftSkill):
         else:
             return nice_date(d.date())
 
-    @intent_file_handler('ReminderAt.intent')
+    @intent_handler('ReminderAt.intent')
     def add_new_reminder(self, msg=None):
-        """ Handler for adding  a reminder with a name at a specific time. """
+        """Handler for adding  a reminder with a name at a specific time."""
         reminder = msg.data.get('reminder', None)
         if reminder is None:
             return self.add_unnamed_reminder_at(msg)
@@ -208,7 +209,7 @@ class ReminderSkill(MycroftSkill):
             self.speak_dialog('NoDateTime')
 
     def __save_reminder_local(self, reminder, reminder_time):
-        """ Speak verification and store the reminder. """
+        """Speak verification and store the reminder."""
         # Choose dialog depending on the date
         if is_today(reminder_time):
             self.speak_dialog('SavingReminder',
@@ -238,11 +239,9 @@ class ReminderSkill(MycroftSkill):
     def response_is_affirmative(self, response):
         return self.voc_match(response, 'yes', self.lang)
 
-    @intent_file_handler('Reminder.intent')
+    @intent_handler('Reminder.intent')
     def add_unspecified_reminder(self, msg=None):
-        """ Starts a dialog to add a reminder when no time was supplied
-            for the reminder.
-        """
+        """Starts a dialog to add a reminder when no time was supplied."""
         reminder = msg.data['reminder']
         # Handle the case where padatious misses the time/date
         if contains_datetime(msg.data['utterance']):
@@ -262,14 +261,12 @@ class ReminderSkill(MycroftSkill):
 
             self.__save_reminder_local(reminder, dt)
         else:
-            LOG.debug('put into general reminders')
+            self.log.debug('put into general reminders')
             self.__save_unspecified_reminder(reminder)
 
-    @intent_file_handler('UnspecifiedReminderAt.intent')
+    @intent_handler('UnspecifiedReminderAt.intent')
     def add_unnamed_reminder_at(self, msg=None):
-        """ Handles the case where a time was given but no reminder
-            name was added.
-        """
+        """Handles the case where a time was given but no reminder name."""
         utterance = msg.data['timedate']
         reminder_time, _ = (extract_datetime(utterance, now_local(), self.lang,
                                              default_time=DEFAULT_TIME) or
@@ -279,15 +276,16 @@ class ReminderSkill(MycroftSkill):
         if response and reminder_time:
             self.__save_reminder_local(response, reminder_time)
 
-    @intent_file_handler('DeleteReminderForDay.intent')
+    @intent_handler('DeleteReminderForDay.intent')
     def remove_reminders_for_day(self, msg=None):
-        """ Remove all reminders for the specified date. """
+        """Remove all reminders for the specified date."""
         if 'date' in msg.data:
             date, _ = extract_datetime(msg.data['date'], lang=self.lang)
         else:
             date, _ = extract_datetime(msg.data['utterance'], lang=self.lang)
 
         date_str = self.date_str(date or now_local().date())
+
         # If no reminders exists for the provided date return;
         for r in self.settings['reminders']:
             if deserialize(r[1]).date() == date.date():
@@ -303,7 +301,7 @@ class ReminderSkill(MycroftSkill):
                         r for r in self.settings['reminders']
                         if deserialize(r[1]).date() != date.date()]
 
-    @intent_file_handler('GetRemindersForDay.intent')
+    @intent_handler('GetRemindersForDay.intent')
     def get_reminders_for_day(self, msg=None):
         """ List all reminders for the specified date. """
         if 'date' in msg.data:
@@ -321,7 +319,7 @@ class ReminderSkill(MycroftSkill):
                 return
         self.speak_dialog('NoUpcoming')
 
-    @intent_file_handler('GetNextReminders.intent')
+    @intent_handler('GetNextReminders.intent')
     def get_next_reminder(self, msg=None):
         """ Get the first upcoming reminder. """
         if len(self.settings.get('reminders', [])) > 0:
@@ -356,7 +354,7 @@ class ReminderSkill(MycroftSkill):
             self.cancellable.remove(c)
         return ret
 
-    @intent_file_handler('CancelActiveReminder.intent')
+    @intent_handler('CancelActiveReminder.intent')
     def cancel_active(self, message):
         """ Cancel a reminder that's been triggered (and is repeating every
             2 minutes. """
@@ -365,7 +363,7 @@ class ReminderSkill(MycroftSkill):
         else:
             self.speak_dialog('NoActive')
 
-    @intent_file_handler('SnoozeReminder.intent')
+    @intent_handler('SnoozeReminder.intent')
     def snooze_active(self, message):
         """ Snooze the triggered reminders for 15 minutes. """
         remove_list = []
@@ -377,7 +375,7 @@ class ReminderSkill(MycroftSkill):
         for c in remove_list:
             self.cancellable.remove(c)
 
-    @intent_file_handler('ClearReminders.intent')
+    @intent_handler('ClearReminders.intent')
     def clear_all(self, message):
         """ Clear all reminders. """
         if self.ask_yesno('ClearAll') == 'yes':
