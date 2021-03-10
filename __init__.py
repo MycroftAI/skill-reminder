@@ -233,6 +233,7 @@ class ReminderSkill(MycroftSkill):
             self.settings['unspec'].append(reminder)
         else:
             self.settings['unspec'] = [reminder]
+        self.speak_dialog('Ok')
 
     def response_is_affirmative(self, response):
         return self.voc_match(response, 'yes', self.lang)
