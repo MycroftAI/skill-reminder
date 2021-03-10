@@ -234,8 +234,8 @@ class ReminderSkill(MycroftSkill):
         else:
             self.settings['unspec'] = [reminder]
 
-    def response_is_negative(self, response):
-        return self.voc_match(response, 'no', self.lang)
+    def response_is_affirmative(self, response):
+        return self.voc_match(response, 'yes', self.lang)
 
     @intent_file_handler('Reminder.intent')
     def add_unspecified_reminder(self, msg=None):
@@ -248,12 +248,12 @@ class ReminderSkill(MycroftSkill):
             return self.add_new_reminder(msg)
 
         response = self.get_response('ParticularTime')
-        if response and not self.response_is_negative(response):
-            # Check if a time was also in the response
-            dt, rest = extract_datetime(response) or (None, None)
+        # Check if a time was in the response
+        dt, rest = extract_datetime(response) or (None, None)
+        if dt or self.response_is_affirmative(response):
             if not dt:
-                # No time found in the response
-                response = self.get_response('SpecifyTime')
+                # No time specified
+                response = self.get_response('SpecifyTime') or ''
                 dt, rest = extract_datetime(response) or None, None
                 if not dt:
                     self.speak('Fine, be that way')
