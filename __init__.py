@@ -73,14 +73,27 @@ class ReminderSkill(MycroftSkill):
     def add_notification(self, identifier, note, expiry):
         self.notes[identifier] = (note, expiry)
 
-    def prime(self, message):
+    def prime(self, _):
+        """Prime the skill on speak messages.
+
+        Will allow the skill to respond if a reminder is about to
+        expire.
+        """
         time.sleep(1)
         self.primed = True
 
-    def reset(self, message):
+    def reset(self, _):
+        """Reset primed state."""
         self.primed = False
 
     def notify(self, message):
+        """Notify event.
+
+        If a user interacted with Mycroft and there is an upcoming reminder
+        (in less than 10 minutes) notify about the upcoming reminder.
+        """
+        # Sleep 10 seconds to provide the user to give further input.
+        # this will reset the self.primed flag exiting quickly
         time.sleep(10)
         if self.name in message.data.get('name', ''):
             self.primed = False
@@ -90,7 +103,7 @@ class ReminderSkill(MycroftSkill):
         now = now_local()
         if self.primed:
             for r in self.settings.get('reminders', []):
-                print('Checking {}'.format(r))
+                self.log.debug('Checking {}'.format(r))
                 dt = deserialize(r[1])
                 if now > dt - timedelta(minutes=10) and now < dt and \
                         r[0] not in self.cancellable:
