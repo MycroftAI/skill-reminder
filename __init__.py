@@ -210,7 +210,7 @@ class ReminderSkill(MycroftSkill):
         for k, v in vocabulary.items():
             if f" {k} " in reminder:
                 reminder = reminder.replace(f" {k} ", f" {v} ")
-        return reminder
+        return reminder.strip()
 
     @intent_handler('ReminderAt.intent')
     def add_new_reminder(self, msg=None):
