@@ -194,9 +194,7 @@ class ReminderSkill(MycroftSkill):
             return self.translate('Tomorrow')
         else:
             return nice_date(d.date())
-
-    def switch_perspective(self, message):
-
+        
     def change_pronouns(self, reminder):
         """Change my / our into you / your, etc.
 
