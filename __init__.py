@@ -195,6 +195,8 @@ class ReminderSkill(MycroftSkill):
         else:
             return nice_date(d.date())
 
+    def switch_perspective(self, message):
+
     def change_pronouns(self, reminder):
         """Change my / our into you / your, etc.
 
@@ -204,11 +206,12 @@ class ReminderSkill(MycroftSkill):
         Arguments:
             reminder (str): reminder text
         """
-        my_regex = r'\b{}\b'.format(self.translate('My'))
-        our_regex = r'\b{}\b'.format(self.translate('Our'))
-        your_word = self.translate('Your')
-        reminder = re.sub(my_regex, your_word, reminder)
-        reminder = re.sub(our_regex, your_word, reminder)
+        vocabulary = self.translate_namedvalues("Perspective")
+
+        reminder = f" {reminder}"
+        for k, v in vocabulary.items():
+            if f" {k} " in reminder:
+                reminder = reminder.replace(f" {k} ", f" {v} ")
         return reminder
 
     @intent_handler('ReminderAt.intent')
