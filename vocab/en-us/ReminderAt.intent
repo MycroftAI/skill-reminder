@@ -1,7 +1,8 @@
-(remind|notify) me to {reminder} ((at|on) {timedate}|tomorrow|the day after {date})
-add new reminder {reminder} (at|on) {timedate}
-add a reminder to {reminder} (at|on) {timedate}
-(remind|notify) me about {reminder} (at|on) {timedate}
+(remind|notify) me to {reminder} ((at|on|for) {timedate}|tomorrow|the day after {date})
+(add|set) new reminder {reminder} (at|on|for) {timedate}
+(add|set) a reminder to {reminder} (at|on|for) {timedate}
+(add|set) a reminder (at|on|for) {timedate} to {reminder}
+(remind|notify) me about {reminder} (at|on|for) {timedate}
 (remind|notify) me to {reminder} in {timedate}
 add new reminder {reminder} in {timedate}
 add a reminder to {reminder} in {timedate}
