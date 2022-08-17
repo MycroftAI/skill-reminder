@@ -292,6 +292,16 @@ class ReminderSkill(MycroftSkill):
             self.log.debug('put into general reminders')
             self.__save_unspecified_reminder(reminder)
 
+    @intent_handler('SomethingReminder.intent')
+    def add_unnamed_reminder_with_no_time(self, msg=None):
+        """Add a reminder when no topic or time was stated."""
+        response = self.get_response('AboutWhat')
+        if response is None:
+            return
+        else:
+            msg.data['reminder'] = response
+        self.add_unspecified_reminder(msg)
+
     @intent_handler('UnspecifiedReminderAt.intent')
     def add_unnamed_reminder_at(self, msg=None):
         """Handles the case where a time was given but no reminder name."""
